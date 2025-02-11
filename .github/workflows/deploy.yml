@@ -43,6 +43,8 @@ jobs:
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
+          sudo usermod -aG docker \$USER
+          sudo systemctl restart docker
           docker pull ${{ steps.login-ecr.outputs.registry }}/fastapi-app:latest
           docker stop fastapi-app || true
           docker rm fastapi-app || true
