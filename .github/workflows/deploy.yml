@@ -119,6 +119,8 @@ jobs:
             }
             EOF
 
+            sudo systemctl restart nginx
+            sudo systemctl enable nginx
             # Stop and remove existing containers
             sudo docker-compose down || true
 
