@@ -40,24 +40,9 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-          # Kill any process using port 8000 (if the app is already running)
-          PORT_8000_PROCESS=$(sudo lsof -t -i:8000)
-          if [ -n "$PORT_8000_PROCESS" ]; then
-            echo "Stopping process using port 8000..."
-            sudo kill -9 $PORT_8000_PROCESS
-          fi
-
           # Start FastAPI application in the background
           nohup uvicorn main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
 
-          # Ensure Nginx is installed
-          sudo yum install -y nginx
-
-          # Validate Nginx configuration before restarting
-          sudo nginx -t && sudo systemctl restart nginx || (echo "Nginx config error!" && exit 1)
-
-          # Enable services on boot
-          sudo systemctl enable nginx
 
 
 
