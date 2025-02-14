@@ -92,7 +92,7 @@ jobs:
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # Ensure dependencies are installed
+          # Check and install Docker if not present
           if ! command -v docker &> /dev/null; then
             sudo yum update -y
             sudo yum install -y docker
@@ -100,34 +100,42 @@ jobs:
             sudo systemctl enable docker
           fi
 
+          # Check and install Docker Compose if not present
           if ! command -v docker-compose &> /dev/null; then
             sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
             sudo chmod +x /usr/local/bin/docker-compose
           fi
 
+          # Check and install AWS CLI if not present
           if ! command -v aws &> /dev/null; then
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
           fi
-          
-          # AWS Region
+
+          # Set AWS Region and ECR Registry
           AWS_REGION=${{ secrets.AWS_REGION }}
           ECR_REGISTRY="${{ steps.login-ecr.outputs.registry }}"
 
           # Login to Amazon ECR
           aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_REGISTRY
-          
-          cd ~/app || mkdir ~/app && cd ~/app
 
-          # Pull and restart container
+          # Navigate to the app directory, create it if it doesn't exist
+          mkdir -p ~/app
+          cd ~/app
+
+          # Pull the latest Docker image from ECR
           sudo docker pull $ECR_REGISTRY/fastapi-app:latest
 
+          # Restart and enable Nginx
           sudo systemctl restart nginx
           sudo systemctl enable nginx
+
           # Stop and remove existing containers
-          cd ~app/
           sudo docker-compose down || true
+
+          # Pull the latest images for Docker Compose services
           sudo docker-compose pull
+
           # Start services with Docker Compose
           sudo docker-compose up -d --force-recreate --remove-orphans
