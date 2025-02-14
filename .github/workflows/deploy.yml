@@ -18,10 +18,12 @@ jobs:
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
+          set -e  # Stop execution on error
+
           # Update packages
           sudo yum update -y
 
-          # Install Python and Git if not installed
+          # Install Python, Git, and other dependencies
           sudo yum install -y python3 python3-venv python3-pip git
 
           # Navigate to home directory and remove old project directory
@@ -40,9 +42,11 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-          # Start FastAPI application in the background
-          nohup uvicorn main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
+          # Stop any existing FastAPI application
+          sudo pkill -f "uvicorn main:app" || true
 
+          # Start FastAPI application in the background
+          nohup venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
 
 
 
