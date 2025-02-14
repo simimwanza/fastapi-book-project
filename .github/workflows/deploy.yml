@@ -40,8 +40,16 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-          sudo pkill -f "uvicorn main:app" || true
-          
+          # kill running
+
+          # Check if the FastAPI application is running
+          if pgrep -f "uvicorn main:app"; then
+              echo "Stopping existing FastAPI application..."
+              sudo pkill -f "uvicorn main:app"
+          else
+              echo "No running FastAPI application found."
+          fi
+
           # Start FastAPI application in the background
           nohup uvicorn main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
 
