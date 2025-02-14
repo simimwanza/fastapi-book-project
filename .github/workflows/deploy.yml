@@ -27,13 +27,7 @@ jobs:
           # Navigate to home directory and remove old project directory
           cd ~
           sudo rm -rf fastapi-book-project
-                    # Check if the FastAPI application is running
-          if pgrep -f "uvicorn main:app"; then
-              echo "Stopping existing FastAPI application..."
-              sudo pkill -f "uvicorn main:app"
-          else
-              echo "No running FastAPI application found."
-          fi
+          sudo pkill -f "uvicorn main:app"
 
           # Clone the latest version of the repository
           git clone https://github.com/simimwanza/fastapi-book-project.git
