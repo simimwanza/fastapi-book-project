@@ -27,7 +27,6 @@ jobs:
           # Navigate to home directory and remove old project directory
           cd ~
           sudo rm -rf fastapi-book-project
-          sudo pkill -f "uvicorn main:app"
 
           # Clone the latest version of the repository
           git clone https://github.com/simimwanza/fastapi-book-project.git
