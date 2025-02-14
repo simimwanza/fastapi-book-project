@@ -92,14 +92,22 @@ jobs:
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
+        
           # Check and install Docker if not present
           if ! command -v docker &> /dev/null; then
             sudo yum update -y
             sudo yum install -y docker
             sudo systemctl start docker
             sudo systemctl enable docker
+            sudo yum install -y lsof
           fi
-
+          if sudo lsof -i :80; then
+            echo "Port 80 is already in use. Stopping conflicting service..."
+            sudo lsof -i :80 -t | xargs -r sudo kill -9
+            echo "Port 80 is now free."
+          else
+            echo "Port 80 is free."
+          fi
           # Check and install Docker Compose if not present
           if ! command -v docker-compose &> /dev/null; then
             sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
